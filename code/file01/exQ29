@@ -113,7 +113,7 @@ int main()
         }
         fclose(fp);
     }
-
+//번호 수정
     void update(){
         FILE *fp;
         FILE *cfp;
@@ -151,6 +151,8 @@ int main()
 
                 found=1;
             }
+            char header[100];
+            fgets(header,sizeof(header),fp);
             fprintf(cfp, "%s,%s,%s,%s\n", p.name,p.num,p.email,p.group);
         }
         fclose(fp);
@@ -192,8 +194,11 @@ int main()
                 found=1;
                 continue;
             }
+            char header[100];
+            fgets(header,sizeof(header),fp);
             fprintf(cfp, "%s,%s,%s,%s\n", p.name,p.num,p.email,p.group);
         }
+        
         fclose(fp);
         fclose(cfp);
         
