@@ -1,0 +1,209 @@
+#include <stdio.h>
+void create();
+void read();
+void update();
+void delete();
+
+typedef struct 
+{
+    int id;
+    char name[50];
+    char num[20];
+    char email[50];
+    char group[30];
+}Phone;
+
+int main()
+{
+    int select;
+    while(1){
+        printf("\n===휴대폰 주소록 관리 기능 프로그램===\n");
+        printf("1. 번호 등록\n");
+        printf("2. 번호 보기\n");
+        printf("3. 번호 수정\n");
+        printf("4. 번호 삭제\n");
+        printf("0. 종료\n");
+        printf("선택 : ");
+        scanf("%d",&select);
+
+        switch(select){
+            case 1:
+            create();
+            break;
+
+            case 2:
+            read();
+            break;
+
+            case 3:
+            update();
+            break;
+
+            case 4:
+            delete();
+            break;
+            
+            case 0:
+            printf("종료\n");
+            return 0;
+
+            default:
+            printf("잘못된 선택입니다.");
+            break;
+        }
+    
+    }
+    return 0;
+}
+
+    //번호등록
+    void create(){
+        FILE *fp;
+        Phone p;
+
+        printf("고유 번호 입력 : ");
+        scanf("%d", &p.id);
+        printf("이름 입력 : ");
+        scanf("%s", p.name);
+        printf("휴대폰 번호 입력 : ");
+        scanf("%s", p.num);
+        printf("이메일 입력 : ");
+        scanf("%s", p.email);
+        printf("관계 입력 : ");
+        scanf("%s", p.group);
+
+        fp=fopen("phone.txt", "r+");
+        if(fp==NULL){
+            fp=fopen("phone.txt", "a");
+            fprintf(fp,"                                       \n");
+            fclose(fp);
+
+            fp=fopen("phone.txt", "r+");
+        }
+        fseek(fp,0,SEEK_SET);
+        fprintf(fp,"고유번호,이름,전화번호,이메일,관계\n");
+        fseek(fp,0,SEEK_END);
+
+        fprintf(fp, "%d,%s,%s,%s,%s\n", p.id,p.name,p.num,p.email,p.group);
+        fclose(fp);
+
+        printf("추가 완료\n");
+    }
+
+    void read(){
+        FILE *fp;
+        Phone p;
+
+        fp=fopen("phone.txt", "r");
+
+        if(fp == NULL){
+            printf("등록된 번호가 없습니다 \n");
+            return;
+        }
+
+        printf("\n[번호목록]\n");
+        printf("고유번호\t이름\t전화번호\t이메일\t관계\n");
+        printf("----------------------------------------------------\n");
+
+        char header[100];
+        fgets(header,sizeof(header),fp);
+
+        while (fscanf(fp,"%d,%49[^,],%19[^,],%49[^,],%29[^,]", &p.id,p.name,p.num,p.email,p.group)==5){
+            printf("%d\t%s\t%s\t%s\t%s\n", p.id,p.name,p.num,p.email,p.group);
+        }
+        fclose(fp);
+    }
+
+    void update(){
+        FILE *fp;
+        FILE *cfp;
+        Phone p;
+
+        int targetId;
+        int found = 0;
+
+        fp=fopen("phone.txt", "r");
+        cfp=fopen("copyphone.txt", "w");
+
+        if(fp==NULL || cfp==NULL){
+            printf("파일 열기 실패\n");
+            return;
+        }
+
+        printf("\n[번호 수정]\n");
+        printf("수정할 번호 고유번호 : ");
+        scanf("%d", &targetId);
+
+        while(fscanf(cfp, "%d,%49[^,],%19[^,],%49[^,],%29[^,]",
+                    &p.id,p.name,p.num,p.email,p.group)==5){
+            if(p.id==targetId){
+                printf("수정할 이름 : ");
+                scanf("%s", p.name);
+
+                printf("수정할 번호 : ");
+                scanf("%s", p.num);
+
+                printf("수정할 이메일 : ");
+                scanf("%s", p.email);
+
+                printf("수정할 관계 : ");
+                scanf("%s", p.group);
+
+                found=1;
+            }
+            fprintf(cfp, "%s,%s,%s,%s\n", p.name,p.num,p.email,p.group);
+        }
+        fclose(fp);
+        fclose(cfp);
+        
+        remove("phone.txt");
+        rename("copyphone.txt", "phone.txt");
+
+        if(found)
+            printf("번호가 수정되었습니다.\n");
+        else
+            printf("해당 고유 번호가 없습니다.\n");
+
+    }
+
+        void delete(){
+        FILE *fp;
+        FILE *cfp;
+        Phone p;
+
+        int targetId;
+        int found = 0;
+
+        fp=fopen("phone.txt", "r");
+        cfp=fopen("copyphone.txt", "w");
+
+        if(fp==NULL || cfp==NULL){
+            printf("파일 열기 실패\n");
+            return;
+        }
+
+        printf("\n[번호 삭제]\n");
+        printf("삭제할 번호 고유번호 : ");
+        scanf("%d", &targetId);
+
+        while(fscanf(cfp, "%d,%49[^,],%19[^,],%49[^,],%29[^,]",
+                    &p.id,p.name,p.num,p.email,p.group)==5){
+            if(p.id==targetId){
+                found=1;
+                continue;
+            }
+            fprintf(cfp, "%s,%s,%s,%s\n", p.name,p.num,p.email,p.group);
+        }
+        fclose(fp);
+        fclose(cfp);
+        
+        remove("phone.txt");
+        rename("copyphone.txt", "phone.txt");
+
+        if(found)
+            printf("번호가 삭제되었습니다.\n");
+        else
+            printf("해당 고유 번호가 없습니다.\n");
+
+    }
+
