@@ -17,6 +17,10 @@ char worker[50];
 int main()
 {
     sqlite3 *db;
+    if(sqlite3_open("/home/smart/work/dbfiles/phone.db", &db) !=SQLITE_OK){
+        printf("데이터베이스 열기 실패 : \n");
+        return 1;
+    }
 
     
     int select;
@@ -65,11 +69,6 @@ int main()
 void create(sqlite3 *db){
     char *errMsg=NULL;
 
-    if(sqlite3_open("/home/smart/work/dbfiles/phone.db", &db) !=SQLITE_OK){
-        printf("데이터베이스 열기 실패 : %s\n", errMsg);
-        exit(1);
-    }
-
     // DB가 잠겨 있으면 최대 5초까지 기다림 !!!!
     sqlite3_busy_timeout(db, 5000);
 
@@ -90,7 +89,7 @@ void create(sqlite3 *db){
     } else{
         printf("테이블 생성 성공\n");
     }
-
+    printf("ex)1,'aaa',100,1,'aaa'\n");
     printf("추가할 정보 : ");
     scanf("%d,%[^,],%d,%d,%s", &pid, pname, &qty, &wid, worker);
 
@@ -145,3 +144,41 @@ void read(sqlite3 *db){
 
     return 0;
 }
+
+void update(sqlite3 *db){
+    char *errMsg = NULL;
+
+    int scan_pid;
+
+    printf("수정할 제품의 번호(PID) 입력: ");
+    scanf("%d", &scan_pid);
+    getchar(); 
+
+    printf("새 제품명 입력: ");
+    scanf("%[^\n]", pname); 
+    getchar();
+
+    printf("새 수량 입력: ");
+    scanf("%d", &qty);
+
+    printf("새 작업자번호 입력: ");
+    scanf("%d", &wid);
+    getchar();
+
+    printf("새 작업자명 입력: ");
+    scanf("%s", worker);
+    getchar();
+
+    char update_sql[600];
+    sprintf(update_sql, 
+        "UPDATE product SET pname='%s', qty=%d, wid=%d, worker='%s' WHERE pid=%d",
+        pname, qty, wid, worker, scan_pid);
+
+        if(sqlite3_exec(db, update_sql, NULL, NULL, &errMsg)!= SQLITE_OK){
+        printf("데이터 수정 실패 : %s\n", errMsg);
+        sqlite3_free(errMsg);
+    } else {
+            printf("데이터 수정 완료\n");
+    }
+}
+
